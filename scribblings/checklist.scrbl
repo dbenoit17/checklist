@@ -1,10 +1,10 @@
 #lang scribble/manual
-@require[@for-label[stella
+@require[@for-label[checklist
                     racket/base]]
 
-@title{stella}
+@title{checklist}
 @author{dbenoit}
 
-@defmodule[stella]
+@defmodule[checklist]
 
 Package Description Here

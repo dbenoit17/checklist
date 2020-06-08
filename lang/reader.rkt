@@ -1,15 +1,15 @@
-#lang at-exp racket/base
+#lang racket/base
 
 (require racket/string
          syntax/strip-context
-         stella/stella
-         stella/lang/parse)
+         checklist/checklist
+         checklist/lang/parse)
 
-(provide (rename-out [stella-read read]
-                     [stella-read-syntax read-syntax]))
+(provide (rename-out [checklist-read read]
+                     [checklist-read-syntax read-syntax]))
 
-(define (stella-read in) 
-  (stella-read-syntax #f in))
+(define (checklist-read in) 
+  (checklist-read-syntax #f in))
 
 (define (unpack req)
   (define len (string-length req))
@@ -26,35 +26,46 @@
 (define (build-expressions lst)
   (cons 'begin
     (for/list ([e lst])
-      (cons (unpack (at-exp-name e)) (map unpack (at-exp-fields e))))))
+      (if (racket-obj? e) (cons 'begin (racket-obj-syntax e))
+        (cons (unpack (checklist-at-exp-name e)) (map unpack (checklist-at-exp-fields e)))))))
 
 (define (is-require? node)
-  (and (at-exp? node) (string=? (at-exp-name node) "require")))
+  (and (checklist-at-exp? node) (string=? (checklist-at-exp-name node) "require")))
 
-(define (stella-read-syntax src in)
+(define (checklist-read-syntax src in)
   (define ast-complete
-    (stella-parser (λ () (stella-lexer in))))
+    (checklist-parser (λ () (checklist-lexer in))))
   
   (define all-requires
     (filter is-require? ast-complete))
-  
+
   (define ast-reqs-lifted
     (filter (compose not is-require?) ast-complete))
 
-  (define stellae  (filter stella-task? ast-reqs-lifted))
-  (define at-exps (filter at-exp? ast-reqs-lifted))
+  (define checklist-items
+    (filter checklist-item? ast-reqs-lifted))
+
+  (define at-exps
+    (filter 
+      (λ (x) (or (checklist-at-exp? x) (racket-obj? x)))
+      ast-reqs-lifted))
   
   (define user-requires
     (build-require-spec
-        (apply append (map at-exp-fields all-requires))))
+        (apply append (map checklist-at-exp-fields all-requires))))
 
- (with-syntax ([stellae stellae]
+ (with-syntax ([checklist-items checklist-items]
+               [current-checklist current-checklist]
                [user-requires user-requires]
                [expressions (build-expressions at-exps)])
+
   (strip-context
-  #'(module stella-task racket/base
-          #;(provide #%stellae at-exps)
+  #'(module checklist racket/base
+          (require checklist) 
+          (provide #%checklist)
           user-requires
-          (define _stellae 'stellae)
-          expressions))))
+          (define #%checklist 'checklist-items)
+          (parameterize ([current-checklist 'checklist-items])
+            expressions
+            (void))))))
 

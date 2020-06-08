@@ -1,0 +1,21 @@
+#lang checklist
+
+;; A todo list
+
+[ ] task 1
+    the first task
+
+[ ] task 2
+    the second task
+
+[ ] task 3
+    the third task
+
+[x] task 4
+    the fourth task
+
+;; Use the @ form to call functions
+
+@printf{"Incomplete tasks:\n"}
+@print-checklist-incomplete
+

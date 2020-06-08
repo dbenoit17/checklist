@@ -1,5 +1,13 @@
 #lang racket/base
 
+(require checklist/checklist
+         checklist/format
+         checklist/print)
+
+(provide (all-from-out checklist/checklist
+                       checklist/format
+                       checklist/print))
+
 (module+ test
   (require rackunit))
 

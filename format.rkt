@@ -2,12 +2,11 @@
 
 (require
   racket/match
-  racket/file
-  racket/port
   racket/format
   racket/string
-  stella/date
-  "stella.rkt")
+  racket/port
+  checklist/checklist
+  checklist/date)
 
 (provide (all-defined-out))
 
@@ -31,18 +30,18 @@
 
 (define (format-at-exp at)
   (match at
-    [(at-exp n f)
+    [(checklist-at-exp n f)
      (let ([field-str (if (= (length f) 0) ""
                           (format "{~a}" (string-join f " ")))]) 
        (format "@~a~a" n field-str))]))
 
 (define (format-desc-elem e)
-  (cond [(word? e) (word-str e)]
-    [(pct-exp? e) (format-pct-exp e)]))
+  (cond [(checklist-word? e) (checklist-word-str e)]
+    [(checklist-pct-exp? e) (format-pct-exp e)]))
 
 (define (format-pct-exp at)
   (match at
-    [(pct-exp n f)
+    [(checklist-pct-exp n f)
      (let ([field-str (if (= (length f) 0) ""
                           (format "{~a}" (string-join f " ")))]) 
        (format "%~a~a" n field-str))]))
@@ -76,20 +75,18 @@
 (define (format-status st)
   (if st "[x]" "[ ]"))
 
-(define (format-stella-task s)
-  (match s
-    [(stella-task n ds st av)
+(define (format-checklist-item i)
+  (match i
+    [(checklist-item n ds st av)
      (format "~a ~a\n~a\n" 
        (format-status st)
        n
        (format-desc ds 65))]))
 
-(define (format-stellae stellae)
+(define (format-checklist-items checklist-items)
   (with-output-to-string
     (λ ()
-      (for ([s stellae])
-        (printf "~a" (format-stella-task s))))))
+      (for ([t checklist-items])
+        (printf "~a" (format-checklist-item t))))))
 
-(define (print-stella-tasks st)
-  (printf "~a" (format-stellae st)))
 

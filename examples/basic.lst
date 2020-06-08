@@ -1,0 +1,23 @@
+#!/usr/bin/racket
+#lang checklist
+
+;; This is a comment.
+;; checklists contain zero or more checklist-items.
+;; checklist-items have three components:
+;;    - status field: `[<x>]`
+;;    - name field:   `<string>\n`
+;;    - description field (optional): `<string>\n ...`
+
+;; The next entry is denoted by the presence of the status field.
+
+;; List of rooms to clean
+[x] living room
+[x] kitchen
+    don't forget to take out the trash
+[ ] dining room
+
+@print-checklist-incomplete
+
+;; prints:
+;; [ ] dining room
+

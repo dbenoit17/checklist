@@ -1,0 +1,41 @@
+#lang checklist
+
+@require{checklist/date}
+
+;; Grocery list
+
+[x] Tomatoes
+    %bought{2020-May-20} %shelf-days{7}
+[x] Potatos
+    %bought{2020-May-20} %shelf-days{21}
+[x] Lettuce
+    %bought{2020-May-20} %shelf-days{8}
+[x] Onions
+    %bought{2020-May-20} %shelf-days{30}
+
+@racket{
+  (define today "2020-Jun-8")
+
+  (define (expired? item)
+    (define bought (car (checklist-item-key-ref item 'bought)))
+    (define shelf-days (car (checklist-item-key-ref item 'shelf-days)))
+    (define expiration (date-plus-days bought shelf-days))
+    (date< expiration today))
+
+  (define (print-expired-items)
+    (for ([item (current-checklist)])
+      (when (expired? item)
+        (print-checklist-item item))))
+}
+
+@print-expired-items
+
+;;  prints:
+;; 
+;; [x] Tomatoes
+;;     %bought{2020-May-20} %shelf-days{7} 
+;; 
+;; [x] Lettuce
+;;     %bought{2020-May-20} %shelf-days{8} 
+
+
